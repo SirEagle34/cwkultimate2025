@@ -28,7 +28,7 @@ from sqlalchemy.sql import func
 import discord_webhook
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--port', type=int, default=5000)
+parser.add_argument('--localhost', type=int, default=5000)
 parser.add_argument('--debug', action='store_true')
 
 args, _ = parser.parse_known_args()
