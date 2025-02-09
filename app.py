@@ -22,6 +22,7 @@ import argparse
 from urllib.parse import parse_qs
 from datetime import datetime, timedelta, timezone
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
 import discord_webhook
@@ -77,10 +78,7 @@ def PersistVersion():
 	}
 	return json.dumps(data)
 
-class AdminActivity(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.Integer, nullable=False, default=int(time.time()))
-    message = db.Column(db.String(8192), nullable=True)
+
 
 def DiscordWebhookMessage(message):
     
@@ -104,10 +102,6 @@ def DiscordWebhookMessage(message):
 		Log("admin", "Failed to send webhook message: " + message)
 		pass
  
-class Admin(UserMixin, db.Model):
-	username: Mapped[str] = mapped_column(db.String(80), primary_key=True, unique=True, nullable=False)
-	password: Mapped[str] = mapped_column(db.String(80), nullable=False)
-	rank: Mapped[int] = mapped_column(db.Integer, nullable=False)
  
 	def get_id(self):
 		return str(self.username)
@@ -668,30 +662,13 @@ def AdminUpsight():
 		
 	return render_template('admin_upsight.html', logs=logs, query=query)
 
-class Bans(db.Model):
-	username = db.Column(db.String(80), primary_key=True)
-	bantype = db.Column(db.String(80), nullable=False)
-	author = db.Column(db.String(80), nullable=True)
-	time = db.Column(db.Integer, nullable=True, default=int(time.time()))
 	
 	def as_dict(self):
 		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-class Logs(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	date = db.Column(db.String(80), nullable=False)
-	time = db.Column(db.String(80), nullable=False)
-	player = db.Column(db.String(80), nullable=False)
-	ip = db.Column(db.String(80), nullable=True)
-	message = db.Column(db.String(8192), nullable=False)
+
  
-class UpsightLogs(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	player_id = db.Column(db.String(80), nullable=False)
-	time = db.Column(db.Integer, nullable=False, default=int(time.time()))
-	event = db.Column(db.String(80), nullable=False)
-	action = db.Column(db.String(80), nullable=False)
-	message = db.Column(db.String(1024), nullable=True)
+
  
 def PlayerLog(ip:str,player:str, message:str):
 	db_log = Logs(date=datetime.now().strftime("%Y-%m-%d"), time=datetime.now().strftime("%H:%M:%S"), player=player, ip=ip, message=message)
@@ -704,25 +681,6 @@ def IPFromRequest(request:Request):
 		ip = request.headers.getlist("X-Forwarded-For")[0]
 	return ip
 
-class Player(db.Model):
-	username = db.Column(db.String(80), primary_key=True, unique=True, nullable=False)
-	game = db.Column(db.String(8192), nullable=True)
-	multiplayer_name = db.Column(db.String(128), nullable=True)
-	icon = db.Column(db.String(128), nullable=True)
-	deck = db.Column(db.String(1024), nullable=True)
-	deck_rank = db.Column(db.String(16), nullable=True)
-	landscapes = db.Column(db.String(1024), nullable=True)
-	helper_creature = db.Column(db.String(1024), nullable=True)
-	leader = db.Column(db.String(128), nullable=True)
-	leader_level = db.Column(db.Integer, nullable=True)
-	allyboxspace = db.Column(db.Integer, nullable=True)
-	level = db.Column(db.Integer, nullable=True)
-	friends = db.Column(db.String(8192), nullable=True, default="[]")
-	friend_requests = db.Column(db.String(8192), nullable=True, default="[]")
-	last_online = db.Column(db.Integer, nullable=True, default=int(time.time()))
-	helpcount = db.Column(db.Integer, nullable=True, default=0)
-	anonymoushelpcount = db.Column(db.Integer, nullable=True, default=0)
-	devicename = db.Column(db.String(128), nullable=True)
  
 	def as_dict(self):
 		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
